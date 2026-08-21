@@ -1,0 +1,220 @@
+--From the table STUDENT perform the following queries:  
+
+--Part – A: 
+
+--1. Display all students whose SPI is greater than 8. 
+
+WITH SPI8 AS
+(
+SELECT * FROM STUDENT
+WHERE SPI>8
+)
+SELECT * FROM SPI8;
+
+
+--2. Display average SPI of all students. 
+
+WITH AVG_SPI AS
+(
+SELECT AVG(SPI) AS AVG_S FROM STUDENT
+)
+SELECT * FROM AVG_SPI;
+
+
+--3. Display total number of students in each branch. 
+
+WITH STU_COUNT AS
+(
+SELECT  BRANCH,COUNT(*) AS COUNT_STU FROM STUDENT
+GROUP BY BRANCH
+)
+SELECT * FROM STU_COUNT;
+
+--4. Display students who belong to RAJKOT city. 
+
+WITH RAJKOT_CITY AS
+(
+SELECT  *  FROM STUDENT
+WHERE CITY = 'RAJKOT'
+)
+SELECT * FROM RAJKOT_CITY;
+
+--5. Find branch names that appear more than once. 
+
+
+WITH STU_COUNT AS
+(
+SELECT  BRANCH,COUNT(*) AS COUNT_STU FROM STUDENT
+GROUP BY BRANCH
+HAVING COUNT(*) > 1
+)
+SELECT * FROM STU_COUNT;
+
+
+--6. Display row number for each student. 
+
+WITH ROW_NUM AS
+(
+SELECT STDID , SNAME , CITY , SPI ,BRANCH,
+ROW_NUMBER() OVER(ORDER BY STDID) AS RN
+FROM STUDENT
+)
+SELECT * FROM ROW_NUM;
+
+--7. Display top 3 students based on SPI. 
+
+
+WITH ROW_NUM AS
+(
+SELECT STDID , SNAME , CITY , SPI ,BRANCH,
+ROW_NUMBER() OVER(ORDER BY SPI DESC) AS RN
+FROM STUDENT
+)
+SELECT * FROM ROW_NUM
+WHERE RN <= 3;
+
+--8. Display students having maximum SPI. 
+
+WITH MAX_SPI AS
+(
+SELECT MAX(SPI) AS M_SPI
+FROM STUDENT
+)
+SELECT *
+FROM STUDENT
+WHERE SPI = (SELECT M_SPI FROM MAX_SPI);
+
+--9. Display students having minimum SPI. 
+
+WITH MIN_SPI AS
+(
+SELECT MIN(SPI) AS MIN_SPI
+FROM STUDENT
+)
+SELECT *
+FROM STUDENT
+WHERE SPI = (SELECT MIN_SPI FROM MIN_SPI);
+
+--10. Display branch -wise rank of students. 
+
+WITH ROW_NUM AS
+(
+SELECT STDID , SNAME , CITY , SPI ,BRANCH,
+RANK() OVER(PARTITION BY BRANCH ORDER BY SPI DESC) AS RN
+FROM STUDENT
+)
+SELECT * FROM ROW_NUM;
+
+ 
+--Part – B: 
+
+--11. Display students SPI average belonging to Computer branch. 
+
+WITH A_SPI AS
+(
+SELECT AVG(SPI) AS A_SPI
+FROM STUDENT
+WHERE BRANCH = 'COMPUTER'
+)
+SELECT * FROM A_SPI;
+
+--12. Display students whose SPI is greater than average SPI of his/her branch. 
+
+WITH AVG_SPI AS
+(
+SELECT *,AVG(SPI) OVER(PARTITION BY BRANCH) AS A_SPI
+FROM STUDENT
+)
+SELECT * FROM AVG_SPI
+WHERE SPI> A_SPI
+
+
+--13. Display branch having more than 2 students. 
+
+WITH STU_COUNT AS
+(
+SELECT  BRANCH,COUNT(*) AS COUNT_STU FROM STUDENT
+GROUP BY BRANCH
+HAVING COUNT(*) > 2
+)
+SELECT * FROM STU_COUNT;
+
+--14. Display branches having average SPI between 7 and 9 
+
+WITH AVG_SPI AS
+(
+SELECT BRANCH,AVG(SPI) AS A_SPI
+FROM STUDENT
+GROUP BY BRANCH
+HAVING AVG(SPI) BETWEEN 7 AND 9
+)
+SELECT * FROM AVG_SPI;
+
+
+--15. Display students whose SPI is lower than overall average SPI. 
+
+WITH L_SPI AS
+(
+SELECT AVG(SPI) AS A_SPI
+FROM STUDENT
+)
+SELECT * FROM STUDENT
+WHERE SPI<(SELECT A_SPI FROM L_SPI);
+
+--Part – C: 
+
+--16. Display branches having exactly one student. 
+
+WITH STU_COUNT AS
+(
+SELECT  BRANCH,COUNT(*) AS COUNT_STU FROM STUDENT
+GROUP BY BRANCH
+HAVING COUNT(*) = 1
+)
+SELECT * FROM STU_COUNT;
+
+--17. Display branch having highest average SPI. 
+
+WITH AVG_SPI AS
+(
+SELECT BRANCH, AVG(SPI) AS A_SPI
+FROM STUDENT
+GROUP BY BRANCH
+)
+SELECT *
+FROM AVG_SPI
+WHERE A_SPI = (SELECT MAX(A_SPI) FROM AVG_SPI);
+
+--18. Display branch having lowest average SPI. 
+
+WITH AVG_SPI AS
+(
+SELECT BRANCH, AVG(SPI) AS A_SPI
+FROM STUDENT
+GROUP BY BRANCH
+)
+SELECT *
+FROM AVG_SPI
+WHERE A_SPI = (SELECT MIN(A_SPI) FROM AVG_SPI);
+
+--19. Display students whose SPI is lower than branch average SPI. 
+
+WITH AVG_SPI AS
+(
+SELECT *,AVG(SPI) OVER(PARTITION BY BRANCH) AS A_SPI
+FROM STUDENT
+)
+SELECT * FROM AVG_SPI
+WHERE SPI < A_SPI
+
+--20. Display branches having maximum number of students. 
+
+WITH STU_COUNT AS
+(
+SELECT BRANCH, COUNT(*) AS COUNT_STU
+FROM STUDENT
+GROUP BY BRANCH
+)
+SELECT *
+FROM STU_COUNT
+WHERE COUNT_STU = (SELECT MAX(COUNT_STU) FROM STU_COUNT);
